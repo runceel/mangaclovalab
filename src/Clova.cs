@@ -30,7 +30,9 @@ namespace MangaClova
             {
                 case RequestType.LaunchRequest:
                     // 起動時の処理
-                    clovaResponse.AddText("こんにちは。占ってって言うと占います。");
+                    clovaResponse.AddText("こんにちは。何を占ってほしいですか？");
+                    clovaResponse.AddText("健康運と恋愛運と金運を占えるよ。");
+                    clovaResponse.AddText("例えば健康運を占ってって聞いてみてね。");
                     clovaResponse.ShouldEndSession = false; // スキルを終わらせないように設定する
                     break;
                 case RequestType.SessionEndedRequest:
@@ -42,12 +44,21 @@ namespace MangaClova
                     {
                         case "FortuneTellingIntent":
                             // 占いのインテント
+                            // 占い対象がスロットに無い場合は総合運勢を占う
+                            var fortune = "総合運勢";
+                            if (clovaRequest.Request.Intent.Slots.TryGetValue("FortuneSlot", out var fortuneSlot))
+                            {
+                                // 占いの対象がある場合は、それをスロットから取得する
+                                fortune = fortuneSlot.Value;
+                            }
+
+                            // 占いの結果を返す
                             var result = new[]{ "大吉", "中吉", "小吉", "末吉" }[new Random().Next(4)];
-                            clovaResponse.AddText($"占いの結果は {result} です。");
+                            clovaResponse.AddText($"{fortune} は {result} です。");
                             break;
                         default:
                             // 認識できなかったインテント
-                            clovaResponse.AddText("こめんなさい。よくわかりませんでした。占ってって言うと占います。");
+                            clovaResponse.AddText("こめんなさい。よくわかりませんでした。例えば健康運を占ってと言うと健康運を占います。");
                             clovaResponse.ShouldEndSession = false; // スキルを終わらせないように設定する
                             break;
                     }
